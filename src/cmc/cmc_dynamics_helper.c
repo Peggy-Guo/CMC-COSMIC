@@ -1641,6 +1641,18 @@ void binint_log_morecollision(const char interaction_type[], long remnant_id,
 }
 
 /**
+* @brief Function to calculate the BH mass after a BH - star collision/merger
+*
+* @param bh_mass mass of BH
+* @param star_mass mass of star
+* @param bh_k index of BH
+*/
+void bh_star_merger(double *bh_mass, double *star_mass, long bh_k){
+	*bh_mass = *bh_mass + F_ACC * *star_mass;
+    star_m[get_global_idx(bh_k)] = *bh_mass;
+}
+
+/**
 * @brief do binary interaction (bin-bin or bin-single)
 *
 * @param k index of 1st star

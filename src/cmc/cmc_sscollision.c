@@ -836,7 +836,20 @@ void sscollision_do(long k, long kp, double rperimax, double w[4], double W, dou
         //MPI: Since we pass the star pointer itself into the merging routine, we need to copy the duplicated array values back into the star element before passing it in.
         copy_globals_to_locals(k);
         copy_globals_to_locals(kp);
-                merge_two_stars(&(star[k]), &(star[kp]), &(star[knew]), vs, curr_st);
+				if (CO_TDE && (star[k].se_k==14 || star[kp].se_k==14)){
+					// check if star
+					if (star[k].se_k < 10){ //k is the star
+						bh_star_merger(&(star[kp].m), &(star[k].m), kp);
+						cp_SEvars_to_star(kp, -1, &(star[knew]));
+						cp_m_to_star(kp, -1, &(star[knew]));
+					}
+					else if (star[kp].se_k< 10){//kp is the star
+						bh_star_merger(&(star[k].m), &(star[kp].m), k);
+						cp_SEvars_to_star(k, -1, &(star[knew]));
+						cp_m_to_star(k, -1, &(star[knew]));
+					}
+				}else{
+                merge_two_stars(&(star[k]), &(star[kp]), &(star[knew]), vs, curr_st);}
 
                 g_knew = get_global_idx(knew);
                 star_r[g_knew] = rcm;

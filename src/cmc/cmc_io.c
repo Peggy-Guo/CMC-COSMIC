@@ -1192,6 +1192,10 @@ if(myid==0) {
                                 PRINT_PARSED(PARAMDOC_S_TDE);
                                 sscanf(values, "%lf", &S_TDE);
                                 parsed.S_TDE = 1;
+						} else if (strcmp(parameter_name, "F_ACC") == 0) {
+							PRINT_PARSED(PARAMDOC_F_ACC);
+							sscanf(values, "%lf", &F_ACC);
+							parsed.F_ACC = 1;		
 			} else if (strcmp(parameter_name, "BH_CAPTURE") == 0) {
 				PRINT_PARSED(PARAMDOC_BH_CAPTURE);
 				sscanf(values, "%ld", &BH_CAPTURE);
@@ -1686,6 +1690,7 @@ if(myid==0) {
         CHECK_PARSED(WD_TC, 0, PARAMDOC_WD_TC);
         CHECK_PARSED(TDE_SPINUP, 0, PARAMDOC_TDE_SPINUP);
         CHECK_PARSED(S_TDE, 0.2, PARAMDOC_S_TDE);
+		CHECK_PARSED(F_ACC, 0.2, PARAMDOC_F_ACC);
 	CHECK_PARSED(BH_CAPTURE, 0, PARAMDOC_BH_CAPTURE);
         CHECK_PARSED(TC_POLYTROPE, 0, PARAMDOC_TC_POLYTROPE);
         CHECK_PARSED(TC_FACTOR, 1.0, PARAMDOC_TC_FACTOR);

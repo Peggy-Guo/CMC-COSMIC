@@ -1106,6 +1106,11 @@ typedef struct{
 * @brief Mass transport rate for TDE_SPINUP; 0 is the highest. 1 the lowest. (default=0.2)
 */
         int S_TDE;
+#define PARAMDOC_F_ACC "Accretion factor for BH-star collisions/mergers (default=0.)"
+/**
+* @brief Accretion factor for BH-star collisions/mergers (default=0.)
+*/
+		int F_ACC;
 #define PARAMDOC_PULSAR_DELTACOUNT "Pulsar output interval in time steps"
 /**
  * @brief Pulsar output interval in time steps
@@ -1800,6 +1805,7 @@ void energy_conservation1();
 void energy_conservation2();
 void new_orbits_calculate();
 void write_morecoll(long i);
+void bh_star_merger(double *bh_mass, double *star_mass, long bh_k);
 void toy_rejuvenation();
 void pre_sort_comm();
 void post_sort_comm();

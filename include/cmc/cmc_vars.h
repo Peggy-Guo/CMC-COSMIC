@@ -342,6 +342,7 @@ _EXTERN_ int CO_TDE;
 _EXTERN_ double WD_TC;
 _EXTERN_ int TDE_SPINUP;
 _EXTERN_ double S_TDE;
+_EXTERN_ double F_ACC;
 _EXTERN_ int CALCULATE10;
 
 /**

@@ -108,3 +108,5 @@ ENV/
 
 # macOs hidden system files
 .DS_Store
+rundir/
+rundir_old/
