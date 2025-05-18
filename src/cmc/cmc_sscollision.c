@@ -836,17 +836,22 @@ void sscollision_do(long k, long kp, double rperimax, double w[4], double W, dou
         //MPI: Since we pass the star pointer itself into the merging routine, we need to copy the duplicated array values back into the star element before passing it in.
         copy_globals_to_locals(k);
         copy_globals_to_locals(kp);
+				/* check if it's a merger of BH-MS; if so and CO_TDE, call the BH-star merger function */
 				if (CO_TDE && (star[k].se_k==14 || star[kp].se_k==14)){
 					// check if star
-					if (star[k].se_k < 10){ //k is the star
-						bh_star_merger(&(star[kp].m), &(star[k].m), kp);
-						cp_SEvars_to_star(kp, -1, &(star[knew]));
-						cp_m_to_star(kp, -1, &(star[knew]));
+					if (star[k].se_k < 10){ //k is the star, kp is the BH
+						// eprintf("peggy_ss: bh-star collision in ss collision, before:t=%.18g bhmass=%g(id=%ld) starmass=%g(id=%ld) bhradius=%g \n",
+						// 	TotalTime, star[kp].m* units.mstar / FB_CONST_MSUN, star[kp].id, star[k].m* units.mstar / FB_CONST_MSUN, star[k].id, star[kp].rad*units.l/RSUN);
+						bh_star_merger(kp, -1, &(star[kp].m), &(star[k].m), &(star[knew]));
+						// eprintf("peggy_ss: bh-star collision in ss collision, after:t=%.18g bhmass=%g(id=%ld) bhradius=%g \n", 
+						// 	TotalTime, star[knew].m* units.mstar / FB_CONST_MSUN, star[knew].id, star[knew].rad*units.l/RSUN);
 					}
-					else if (star[kp].se_k< 10){//kp is the star
-						bh_star_merger(&(star[k].m), &(star[kp].m), k);
-						cp_SEvars_to_star(k, -1, &(star[knew]));
-						cp_m_to_star(k, -1, &(star[knew]));
+					else if (star[kp].se_k< 10){//kp is the star, k is the BH
+						// eprintf("peggy_ss: bh-star collision in ss collision, before:t=%.18g bhmass=%g(id=%ld) starmass=%g(id=%ld) bhradius=%g \n",
+						// 	TotalTime, star[k].m* units.mstar / FB_CONST_MSUN, star[k].id, star[kp].m* units.mstar / FB_CONST_MSUN, star[kp].id, star[k].rad*units.l/RSUN);
+						bh_star_merger(k, -1,  &(star[k].m), &(star[kp].m), &(star[knew]));
+						// eprintf("peggy_ss: bh-star collision in ss collision, after:t=%.18g bhmass=%g(id=%ld) bhradius=%g \n", 
+						// 	TotalTime, star[knew].m* units.mstar / FB_CONST_MSUN, star[knew].id, star[knew].rad*units.l/RSUN);
 					}
 				}else{
                 merge_two_stars(&(star[k]), &(star[kp]), &(star[knew]), vs, curr_st);}
