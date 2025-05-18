@@ -1805,7 +1805,7 @@ void energy_conservation1();
 void energy_conservation2();
 void new_orbits_calculate();
 void write_morecoll(long i);
-void bh_star_merger(double *bh_mass, double *star_mass, long bh_k);
+void bh_star_merger(long oldbhk, int bi, double *bh_mass, double *star_mass, star_t *new_bh);
 void toy_rejuvenation();
 void pre_sort_comm();
 void post_sort_comm();
