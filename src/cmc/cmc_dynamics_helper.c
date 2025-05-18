@@ -1641,15 +1641,24 @@ void binint_log_morecollision(const char interaction_type[], long remnant_id,
 }
 
 /**
-* @brief Function to calculate the BH mass after a BH - star collision/merger
+* @brief Function to calculate the BH mass & radius after a BH - star collision/merger
 *
+* @param oldbhk index of old BH in star; if -1, new BH already assigned with new SEvars
+* @param bi if star is binary, index of old BH in the binary pair; 0 or 1 for binary, -1 for non-binary
 * @param bh_mass mass of BH
 * @param star_mass mass of star
-* @param bh_k index of BH
+* @param new_bh pointer to new BH
 */
-void bh_star_merger(double *bh_mass, double *star_mass, long bh_k){
-	*bh_mass = *bh_mass + F_ACC * *star_mass;
-    star_m[get_global_idx(bh_k)] = *bh_mass;
+void bh_star_merger(long oldbhk, int bi, double *bh_mass, double *star_mass, star_t *new_bh){
+	if (oldbhk != -1) {
+		cp_SEvars_to_star(oldbhk, bi, new_bh);
+	}
+	new_bh->m = *bh_mass  + F_ACC * *star_mass;
+	new_bh->se_mass = new_bh->m * units.mstar / MSUN;
+	new_bh->se_mt  = new_bh->m * units.mstar / MSUN;
+	new_bh->se_mc = new_bh->m * units.mstar / MSUN;
+	new_bh->se_radius = 4.24e-06 * new_bh->se_mass;  //Schwarzschild radius, 4.24e-06 is 2G/c^2 in units of Rsun/Msun
+	new_bh->rad = new_bh->se_radius * RSUN / units.l;
 }
 
 /**
@@ -1939,6 +1948,29 @@ void binint_do(long k, long kp, double rperi, double w[4], double W, double rcm,
                             star[knew].se_bhspin = hier.obj[i]->chi;
                             star[knew].se_radius = hier.obj[i]->R * cmc_units.l / BH_RADIUS_MULTIPLYER * units.l / RSUN;
                             star[knew].Eint = 0;
+							if (CO_TDE){
+								// check if it's a merger of BH-MS; if so, call the BH-star merger function
+								if (star[knew].se_k < 10){ //knew is the star， tempstar is the BH
+									// eprintf("peggy_single: bh-star collision in binint_do, before:t=%.18g bhmass=%g(id=%ld) starmass=%g(id=%ld) bhradius=%g \n",
+									// 	TotalTime, tempstar.m* units.mstar / FB_CONST_MSUN, hier.obj[i]->id[nmerged], 
+									// 	star[knew].m* units.mstar / FB_CONST_MSUN, hier.obj[i]->id[nmerged-1], tempstar.rad* units.l/RSUN);
+									bh_star_merger(oldk, bi, &(tempstar.m), &(star[knew].m), &(star[knew]));
+									// eprintf("peggy_single: bh-star collision in binint_do, after:t=%.18g bhmass=%g(id=%ld) bhradius=%g \n", 
+									// 	TotalTime, star[knew].m* units.mstar / FB_CONST_MSUN, star[knew].id, star[knew].rad* units.l/RSUN);
+								}
+								else if (tempstar.se_k< 10){//tempstar is the star, knew is the BH
+									// if (nmerged==1){ // only merged once
+									// 	eprintf("peggy_single: bh-star collision in binint_do, before:t=%.18g bhmass=%g(id=%ld) starmass=%g(id=%ld) bhradius=%g \n",
+									// 		TotalTime, star[knew].m* units.mstar / FB_CONST_MSUN, hier.obj[i]->id[0], 
+									// 		tempstar.m* units.mstar / FB_CONST_MSUN, hier.obj[i]->id[nmerged], star[knew].rad* units.l/RSUN);
+									// }else{ // repeated merger, id unknown
+									// 	eprintf("peggy_single: bh-star collision in binint_do, before:t=%.18g bhmass=%g(id=unknown) starmass=%g(id=%ld) bhradius=%g \n",
+									// 		TotalTime, star[knew].m* units.mstar / FB_CONST_MSUN, 
+									// 		tempstar.m* units.mstar / FB_CONST_MSUN, hier.obj[i]->id[nmerged], star[knew].rad* units.l/RSUN);}
+									bh_star_merger(-1, -1, &(star[knew].m), &(tempstar.m), &(star[knew]));
+									// eprintf("peggy_single: bh-star collision in binint_do, after:t=%.18g bhmass=%g(id=%ld) bhradius=%g \n", 
+									// 	TotalTime, star[knew].m* units.mstar / FB_CONST_MSUN, star[knew].id, star[knew].rad* units.l/RSUN);
+							}}
                             if(WRITE_BH_INFO && tempstar.se_k == 14 && star[knew].se_k == 14)
                                 parafprintf(bhmergerfile, "%.18g %s %g %ld %ld %g %g %g %g %ld %g %g %g %g %g %g %g %g %g %g %g %g\n",
                                                           TotalTime, (isbinbin?"binary-binary":"binary-single"),
@@ -2037,9 +2069,34 @@ void binint_do(long k, long kp, double rperi, double w[4], double W, double rcm,
                             tempstar.se_bhspin = hier.obj[i]->obj[0]->chi;
                             tempstar.se_radius = hier.obj[i]->obj[0]->R * cmc_units.l/ BH_RADIUS_MULTIPLYER * units.l / RSUN;
                             tempstar.Eint = 0;
+							if (CO_TDE){
+								// check if it's a merger of BH-MS; if so, call the BH-star merger function
+								if (tempstar.se_k < 10){ //tempstar is the star， tempstar2 is the BH
+									// eprintf("peggy_binary: bh-star collision in binint_do, before:t=%.18g bhmass=%g(id=%ld) starmass=%g(id=%ld) bhradius=%g \n",
+									// 	TotalTime, tempstar2.m* units.mstar / FB_CONST_MSUN, hier.obj[i]->obj[0]->id[nmerged], 
+									// 	tempstar.m* units.mstar / FB_CONST_MSUN, hier.obj[i]->obj[0]->id[nmerged-1], tempstar2.rad* units.l / RSUN);
+									bh_star_merger(oldk, bi, &(tempstar2.m) , &(tempstar.m), &(tempstar));
+									// eprintf("peggy_binary: bh-star collision in binint_do, after:t=%.18g bhmass=%g(id=%ld) bhradius=%g \n", 
+									// 	TotalTime, tempstar.m* units.mstar / FB_CONST_MSUN, tempstar.id, tempstar.rad* units.l / RSUN);
+								}
+								else if (tempstar2.se_k< 10){//tempstar2 is the star, tempstar is the BH
+									// if (nmerged==1){ // only merged once
+									// 	eprintf("peggy_binary: bh-star collision in binint_do, before:t=%.18g bhmass=%g(id=%ld) starmass=%g(id=%ld) bhradius=%g \n",
+									// 		TotalTime, tempstar.m* units.mstar / FB_CONST_MSUN, hier.obj[i]->obj[0]->id[0], 
+									// 		tempstar2.m* units.mstar / FB_CONST_MSUN, hier.obj[i]->obj[0]->id[nmerged], tempstar.rad* units.l / RSUN);
+									// }else{ // repeated merger, id unknown
+									// 	eprintf("peggy_binary: bh-star collision in binint_do, before:t=%.18g bhmass=%g(id=unknown) starmass=%g(id=%ld) bhradius=%g \n",
+									// 		TotalTime, tempstar.m* units.mstar / FB_CONST_MSUN,
+									// 		tempstar2.m* units.mstar / FB_CONST_MSUN, hier.obj[i]->obj[0]->id[nmerged], tempstar.rad* units.l / RSUN);}
+									bh_star_merger(-1, -1, &(tempstar.m) , &(tempstar2.m), &(tempstar));
+									// eprintf("peggy_binary: bh-star collision in binint_do, after:t=%.18g bhmass=%g(id=%ld) bhradius=%g \n", 
+									// 	TotalTime, tempstar.m* units.mstar / FB_CONST_MSUN, tempstar.id, tempstar.rad* units.l / RSUN);
+							}}
                             if(WRITE_BH_INFO && tempstar2.se_k == 14 && tempstar.se_k == 14)
                                 parafprintf(bhmergerfile, "%.18g %s %g %ld %ld %g %g %g %g %ld %g %g %g %g %g %g %g %g %g %g %g %g\n",
                                                           TotalTime, (isbinbin?"binary-binary":"binary-single"),
+														//peggy question: is the hier.obj[i]->obj[0]->id[0] here correct if nmerged>1 (repeated merger)?
+														// 				  there's a note in bhmerger.dat saying initial mass will be wrong, but is the id also wrong?
                                                           star_r[get_global_idx(knew)], hier.obj[i]->obj[0]->id[0],hier.obj[i]->obj[0]->id[nmerged], 
                                                           binint_get_mass(k, kp, hier.obj[i]->obj[0]->id[0]) * units.mstar / FB_CONST_MSUN, 
                                                           binint_get_mass(k, kp, hier.obj[i]->obj[0]->id[nmerged]) * units.mstar / FB_CONST_MSUN,
@@ -2126,6 +2183,29 @@ void binint_do(long k, long kp, double rperi, double w[4], double W, double rcm,
                             tempstar.se_bhspin = hier.obj[i]->obj[1]->chi;
                             tempstar.se_radius = hier.obj[i]->obj[1]->R * cmc_units.l/ BH_RADIUS_MULTIPLYER * units.l / RSUN;
                             tempstar.Eint = 0;
+							if (CO_TDE){
+							// check if it's a merger of BH-MS; if so, call the BH-star merger function
+							if (tempstar.se_k < 10){ //tempstar is the star， tempstar2 is the BH
+								// eprintf("peggy_binary: bh-star collision in binint_do, before:t=%.18g bhmass=%g(id=%ld) starmass=%g(id=%ld) bhradius=%g \n",
+								// 	TotalTime, tempstar2.m* units.mstar / FB_CONST_MSUN, hier.obj[i]->obj[1]->id[nmerged], 
+								// 	tempstar.m* units.mstar / FB_CONST_MSUN, hier.obj[i]->obj[1]->id[nmerged-1], tempstar2.rad* units.l / RSUN);
+								bh_star_merger(oldk, bi, &(tempstar2.m) , &(tempstar.m), &(tempstar));
+								// eprintf("peggy_binary: bh-star collision in binint_do, after:t=%.18g bhmass=%g(id=%ld) bhradius=%g \n", 
+								// 	TotalTime, tempstar.m* units.mstar / FB_CONST_MSUN, tempstar.id, tempstar.rad* units.l / RSUN);
+							}
+							else if (tempstar2.se_k< 10){//tempstar2 is the star, tempstar is the BH
+								// if (nmerged==1){ // only merged once
+								// 	eprintf("peggy_binary: bh-star collision in binint_do, before:t=%.18g bhmass=%g(id=%ld) starmass=%g(id=%ld) bhradius=%g \n",
+								// 		TotalTime, tempstar.m* units.mstar / FB_CONST_MSUN, hier.obj[i]->obj[1]->id[0], 
+								// 		tempstar2.m* units.mstar / FB_CONST_MSUN, hier.obj[i]->obj[1]->id[nmerged], tempstar.rad* units.l / RSUN);
+								// }else{ // repeated merger, id unknown
+								// 	eprintf("peggy_binary: bh-star collision in binint_do, before:t=%.18g bhmass=%g(id=unknown) starmass=%g(id=%ld) bhradius=%g \n",
+								// 		TotalTime, tempstar.m* units.mstar / FB_CONST_MSUN,
+								// 		tempstar2.m* units.mstar / FB_CONST_MSUN, hier.obj[i]->obj[1]->id[nmerged], tempstar.rad* units.l / RSUN);}
+								bh_star_merger(-1, -1, &(tempstar.m) , &(tempstar2.m), &(tempstar));
+								// eprintf("peggy_binary: bh-star collision in binint_do, after:t=%.18g bhmass=%g(id=%ld) bhradius=%g \n", 
+								// 	TotalTime, tempstar.m* units.mstar / FB_CONST_MSUN, tempstar.id, tempstar.rad* units.l / RSUN);
+							}}
                             if(WRITE_BH_INFO && tempstar2.se_k == 14 && tempstar.se_k == 14)
                                 parafprintf(bhmergerfile, "%.18g %s %g %ld %ld %g %g %g %g %ld %g %g %g %g %g %g %g %g %g %g %g %g\n",
                                                           TotalTime, (isbinbin?"binary-binary":"binary-single"),
@@ -2268,6 +2348,29 @@ void binint_do(long k, long kp, double rperi, double w[4], double W, double rcm,
                             star[knewp].se_bhspin = hier.obj[i]->obj[sid]->chi;
                             star[knewp].se_radius = hier.obj[i]->obj[sid]->R * cmc_units.l/ BH_RADIUS_MULTIPLYER * units.l / RSUN;
                             star[knewp].Eint = 0;
+							if (CO_TDE){
+							// check if it's a merger of BH-MS; if so, call the BH-star merger function
+							if (star[knewp].se_k < 10){ //knew is the star， tempstar is the BH
+								// eprintf("peggy_triple_sig: bh-star collision in binint_do, before:t=%.18g bhmass=%g(id=%ld) starmass=%g(id=%ld) bhradius=%g \n",
+								// 	TotalTime, tempstar.m* units.mstar / FB_CONST_MSUN, hier.obj[i]->obj[sid]->id[nmerged], 
+								// 	star[knewp].m* units.mstar / FB_CONST_MSUN, hier.obj[i]->id[nmerged-1], tempstar.rad* units.l / RSUN);
+								bh_star_merger(oldk, bi, &(tempstar.m), &(star[knewp].m), &(star[knewp]));
+								// eprintf("peggy_triple_sig: bh-star collision in binint_do, after:t=%.18g bhmass=%g(id=%ld) bhradius=%g \n", 
+								// 	TotalTime, star[knewp].m* units.mstar / FB_CONST_MSUN, star[knewp].id, star[knewp].rad* units.l / RSUN);
+							}
+							else if (tempstar.se_k< 10){//tempstar is the star, knew is the BH
+								// if (nmerged==1){ // only merged once
+								// 	eprintf("peggy_triple_sig: bh-star collision in binint_do, before:t=%.18g bhmass=%g(id=%ld) starmass=%g(id=%ld) bhradius=%g \n",
+								// 		TotalTime, star[knewp].m* units.mstar / FB_CONST_MSUN, hier.obj[i]->obj[sid]->id[0], 
+								// 		tempstar.m* units.mstar / FB_CONST_MSUN, hier.obj[i]->obj[sid]->id[nmerged], star[knewp].rad* units.l / RSUN);
+								// }else{ // repeated merger, id unknown
+								// 	eprintf("peggy_triple_sig: bh-star collision in binint_do, before:t=%.18g bhmass=%g(id=unknown) starmass=%g(id=%ld) bhradius=%g \n",
+								// 		TotalTime, star[knewp].m* units.mstar / FB_CONST_MSUN, 
+								// 		tempstar.m* units.mstar / FB_CONST_MSUN, hier.obj[i]->obj[sid]->id[nmerged], star[knewp].rad* units.l / RSUN);}
+								bh_star_merger(-1, -1, &(star[knewp].m), &(tempstar.m), &(star[knewp]));
+								// eprintf("peggy_triple_sig: bh-star collision in binint_do, after:t=%.18g bhmass=%g(id=%ld) bhradius=%g \n", 
+								// 	TotalTime, star[knewp].m* units.mstar / FB_CONST_MSUN, star[knewp].id, star[knewp].rad* units.l / RSUN);
+							}}
                             if(WRITE_BH_INFO && star[knewp].se_k == 14 && tempstar.se_k == 14 )
                                 parafprintf(bhmergerfile, "%.18g %s %g %ld %ld %g %g %g %g %ld %g %g %g %g %g %g %g %g %g %g %g %g\n",
                                                           TotalTime, (isbinbin?"binary-binary":"binary-single"),
@@ -2360,6 +2463,29 @@ void binint_do(long k, long kp, double rperi, double w[4], double W, double rcm,
                             tempstar.se_bhspin = hier.obj[i]->obj[bid]->obj[0]->chi;
                             tempstar.se_radius = hier.obj[i]->obj[bid]->obj[0]->R * cmc_units.l/ BH_RADIUS_MULTIPLYER * units.l / RSUN;
                             tempstar.Eint = 0;
+							if (CO_TDE){
+							// check if it's a merger of BH-MS; if so, call the BH-star merger function
+							if (tempstar.se_k < 10){ //tempstar is the star， tempstar2 is the BH
+								// eprintf("peggy_triple_bin: bh-star collision in binint_do, before:t=%.18g bhmass=%g(id=%ld) starmass=%g(id=%ld) bhradius=%g \n",
+								// 	TotalTime, tempstar2.m* units.mstar / FB_CONST_MSUN, hier.obj[i]->obj[bid]->obj[0]->id[nmerged], 
+								// 	tempstar.m* units.mstar / FB_CONST_MSUN, hier.obj[i]->obj[bid]->obj[0]->id[nmerged-1], tempstar2.rad* units.l / RSUN);
+								bh_star_merger(oldk, bi, &(tempstar2.m) , &(tempstar.m), &(tempstar));
+								// eprintf("peggy_triple_bin: bh-star collision in binint_do, after:t=%.18g bhmass=%g(id=%ld) bhradius=%g \n", 
+								// 	TotalTime, tempstar.m* units.mstar / FB_CONST_MSUN, tempstar.id, tempstar.rad* units.l / RSUN);
+							}
+							else if (tempstar2.se_k< 10){//tempstar2 is the star, tempstar is the BH
+								// if (nmerged==1){ // only merged once
+								// 	eprintf("peggy_triple_bin: bh-star collision in binint_do, before:t=%.18g bhmass=%g(id=%ld) starmass=%g(id=%ld) bhradius=%g \n",
+								// 		TotalTime, tempstar.m* units.mstar / FB_CONST_MSUN, hier.obj[i]->obj[bid]->obj[0]->id[0], 
+								// 		tempstar2.m* units.mstar / FB_CONST_MSUN, hier.obj[i]->obj[bid]->obj[0]->id[nmerged], tempstar.rad* units.l / RSUN);
+								// }else{ // repeated merger, id unknown
+								// 	eprintf("peggy_triple_bin: bh-star collision in binint_do, before:t=%.18g bhmass=%g(id=unknown) starmass=%g(id=%ld) bhradius=%g \n",
+								// 		TotalTime, tempstar.m* units.mstar / FB_CONST_MSUN,
+								// 		tempstar2.m* units.mstar / FB_CONST_MSUN, hier.obj[i]->obj[bid]->obj[0]->id[nmerged], tempstar.rad* units.l / RSUN);}
+								bh_star_merger(-1, -1, &(tempstar.m) , &(tempstar2.m), &(tempstar));
+								// eprintf("peggy_triple_bin: bh-star collision in binint_do, after:t=%.18g bhmass=%g(id=%ld) bhradius=%g \n", 
+								// 	TotalTime, tempstar.m* units.mstar / FB_CONST_MSUN, tempstar.id, tempstar.rad* units.l / RSUN);
+							}}
                             if(WRITE_BH_INFO && tempstar2.se_k == 14 && tempstar.se_k == 14)
                                 parafprintf(bhmergerfile, "%.18g %s %g %ld %ld %g %g %g %g %ld %g %g %g %g %g %g %g %g %g %g %g %g\n",
                                                           TotalTime, (isbinbin?"binary-binary":"binary-single"),
@@ -2444,6 +2570,29 @@ void binint_do(long k, long kp, double rperi, double w[4], double W, double rcm,
                             tempstar.se_bhspin = hier.obj[i]->obj[bid]->obj[1]->chi;
                             tempstar.se_radius = hier.obj[i]->obj[bid]->obj[1]->R * cmc_units.l/ BH_RADIUS_MULTIPLYER * units.l / RSUN;
                             tempstar.Eint = 0;
+							if (CO_TDE){
+							// check if it's a merger of BH-MS; if so, call the BH-star merger function
+							if (tempstar.se_k < 10){ //tempstar is the star， tempstar2 is the BH
+								// eprintf("peggy_triple_bin: bh-star collision in binint_do, before:t=%.18g bhmass=%g(id=%ld) starmass=%g(id=%ld) bhradius=%g \n",
+								// 	TotalTime, tempstar2.m* units.mstar / FB_CONST_MSUN, hier.obj[i]->obj[bid]->obj[1]->id[nmerged], 
+								// 	tempstar.m* units.mstar / FB_CONST_MSUN, hier.obj[i]->obj[bid]->obj[1]->id[nmerged-1], tempstar2.rad* units.l / RSUN);
+								bh_star_merger(oldk, bi, &(tempstar2.m) , &(tempstar.m), &(tempstar));
+								// eprintf("peggy_triple_bin: bh-star collision in binint_do, after:t=%.18g bhmass=%g(id=%ld) bhradius=%g \n", 
+								// 	TotalTime, tempstar.m* units.mstar / FB_CONST_MSUN, tempstar.id, tempstar.rad* units.l / RSUN);
+							}
+							else if (tempstar2.se_k< 10){//tempstar2 is the star, tempstar is the BH
+								// if (nmerged==1){ // only merged once
+								// 	eprintf("peggy_triple_bin: bh-star collision in binint_do, before:t=%.18g bhmass=%g(id=%ld) starmass=%g(id=%ld) bhradius=%g \n",
+								// 		TotalTime, tempstar.m* units.mstar / FB_CONST_MSUN, hier.obj[i]->obj[bid]->obj[1]->id[0], 
+								// 		tempstar2.m* units.mstar / FB_CONST_MSUN, hier.obj[i]->obj[bid]->obj[1]->id[nmerged], tempstar.rad* units.l / RSUN);
+								// }else{ // repeated merger, id unknown
+								// 	eprintf("peggy_triple_bin: bh-star collision in binint_do, before:t=%.18g bhmass=%g(id=unknown) starmass=%g(id=%ld) bhradius=%g \n",
+								// 		TotalTime, tempstar.m* units.mstar / FB_CONST_MSUN,
+								// 		tempstar2.m* units.mstar / FB_CONST_MSUN, hier.obj[i]->obj[bid]->obj[1]->id[nmerged], tempstar.rad* units.l / RSUN);}
+								bh_star_merger(-1, -1, &(tempstar.m) , &(tempstar2.m), &(tempstar));
+								// eprintf("peggy_triple_bin: bh-star collision in binint_do, after:t=%.18g bhmass=%g(id=%ld) bhradius=%g \n", 
+								// 	TotalTime, tempstar.m* units.mstar / FB_CONST_MSUN, tempstar.id, tempstar.rad* units.l / RSUN);
+							}}
                             if(WRITE_BH_INFO && tempstar2.se_k == 14 && tempstar.se_k == 14)
                                 parafprintf(bhmergerfile, "%.18g %s %g %ld %ld %g %g %g %g %ld %g %g %g %g %g %g %g %g %g %g %g %g\n",
                                                           TotalTime, (isbinbin?"binary-binary":"binary-single"),
