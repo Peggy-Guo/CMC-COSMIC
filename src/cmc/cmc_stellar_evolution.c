@@ -609,29 +609,6 @@ void do_stellar_evolution(gsl_rng *rng)
 		epochprev1=binary[kb].bse_epoch[1];
 		tbprev= binary[kb].bse_tb;
 
-    if (CO_TDE && (kprev0 == 14 || kprev1 == 14)){
-      // check if star
-      if (kprev0 < 10){//0 is the star, 1 is the BH
-          eprintf("peggy_check_beforebse: BH: t=%.18g ktype=%d m=%g mt=%g R=%g L=%g mc=%g rc=%g menv=%g renv=%g ospin=%g epoch=%g tms=%g tphys=%g bhspin=%g\n",
-            TotalTime, binary[kb].bse_kw[1], binary[kb].bse_mass0[1], binary[kb].bse_mass[1], binary[kb].bse_radius[1], binary[kb].bse_lum[1], 
-            binary[kb].bse_massc[1], binary[kb].bse_radc[1], binary[kb].bse_menv[1], binary[kb].bse_renv[1], binary[kb].bse_ospin[1], 
-            binary[kb].bse_epoch[1], binary[kb].bse_tms[1], binary[kb].bse_tphys, binary[kb].bse_bhspin[1]);
-          eprintf("peggy_check_beforebse: Star: t=%.18g ktype=%d m=%g mt=%g R=%g L=%g mc=%g rc=%g menv=%g renv=%g ospin=%g epoch=%g tms=%g tphys=%g bhspin=%g\n",
-              TotalTime, binary[kb].bse_kw[0], binary[kb].bse_mass0[0], binary[kb].bse_mass[0], binary[kb].bse_radius[0], binary[kb].bse_lum[0],
-              binary[kb].bse_massc[0], binary[kb].bse_radc[0], binary[kb].bse_menv[0], binary[kb].bse_renv[0], binary[kb].bse_ospin[0],
-              binary[kb].bse_epoch[0], binary[kb].bse_tms[0], binary[kb].bse_tphys, binary[kb].bse_bhspin[0]);
-            }
-      else if (kprev1 < 10){//1 is the star, 0 is the BH
-          eprintf("peggy_check_beforebse: BH: t=%.18g ktype=%d m=%g mt=%g R=%g L=%g mc=%g rc=%g menv=%g renv=%g ospin=%g epoch=%g tms=%g tphys=%g bhspin=%g\n",
-            TotalTime, binary[kb].bse_kw[0], binary[kb].bse_mass0[0], binary[kb].bse_mass[0], binary[kb].bse_radius[0], binary[kb].bse_lum[0], 
-            binary[kb].bse_massc[0], binary[kb].bse_radc[0], binary[kb].bse_menv[0], binary[kb].bse_renv[0], binary[kb].bse_ospin[0], 
-            binary[kb].bse_epoch[0], binary[kb].bse_tms[0], binary[kb].bse_tphys, binary[kb].bse_bhspin[0]);
-          eprintf("peggy_check_beforebse: Star: t=%.18g ktype=%d m=%g mt=%g R=%g L=%g mc=%g rc=%g menv=%g renv=%g ospin=%g epoch=%g tms=%g tphys=%g bhspin=%g\n",
-              TotalTime, binary[kb].bse_kw[1], binary[kb].bse_mass0[1], binary[kb].bse_mass[1], binary[kb].bse_radius[1], binary[kb].bse_lum[1],
-              binary[kb].bse_massc[1], binary[kb].bse_radc[1], binary[kb].bse_menv[1], binary[kb].bse_renv[1], binary[kb].bse_ospin[1],
-              binary[kb].bse_epoch[1], binary[kb].bse_tms[1], binary[kb].bse_tphys, binary[kb].bse_bhspin[1]);
-            }
-          }
     
  
 		/*If we've got a large MS star, we need to reduce the timestep, otherwise
@@ -1098,29 +1075,6 @@ void handle_bse_outcome(long k, long kb, double *vs, double tphysf, int kprev0, 
     knew = create_star(k, 1);
     cp_binmemb_to_star(k, 0, knew);
 
-    if (CO_TDE && (kprev0 == 14 || kprev1 == 14)){
-      // check if star
-      if (kprev0 < 10){//0 is the star, 1 is the BH
-          eprintf("peggy_check_afterbse: BH: t=%.18g ktype=%d m=%g mt=%g R=%g L=%g mc=%g rc=%g menv=%g renv=%g ospin=%g epoch=%g tms=%g tphys=%g bhspin=%g\n",
-            TotalTime, binary[kb].bse_kw[1], binary[kb].bse_mass0[1], binary[kb].bse_mass[1], binary[kb].bse_radius[1], binary[kb].bse_lum[1], 
-            binary[kb].bse_massc[1], binary[kb].bse_radc[1], binary[kb].bse_menv[1], binary[kb].bse_renv[1], binary[kb].bse_ospin[1], 
-            binary[kb].bse_epoch[1], binary[kb].bse_tms[1], binary[kb].bse_tphys, binary[kb].bse_bhspin[1]);
-          eprintf("peggy_check_afterbse: Star: t=%.18g ktype=%d m=%g mt=%g R=%g L=%g mc=%g rc=%g menv=%g renv=%g ospin=%g epoch=%g tms=%g tphys=%g bhspin=%g\n",
-              TotalTime, binary[kb].bse_kw[0], binary[kb].bse_mass0[0], binary[kb].bse_mass[0], binary[kb].bse_radius[0], binary[kb].bse_lum[0],
-              binary[kb].bse_massc[0], binary[kb].bse_radc[0], binary[kb].bse_menv[0], binary[kb].bse_renv[0], binary[kb].bse_ospin[0],
-              binary[kb].bse_epoch[0], binary[kb].bse_tms[0], binary[kb].bse_tphys, binary[kb].bse_bhspin[0]);
-            }
-      else if (kprev1 < 10){//1 is the star, 0 is the BH
-          eprintf("peggy_check_afterbse: BH: t=%.18g ktype=%d m=%g mt=%g R=%g L=%g mc=%g rc=%g menv=%g renv=%g ospin=%g epoch=%g tms=%g tphys=%g bhspin=%g\n",
-            TotalTime, binary[kb].bse_kw[0], binary[kb].bse_mass0[0], binary[kb].bse_mass[0], binary[kb].bse_radius[0], binary[kb].bse_lum[0], 
-            binary[kb].bse_massc[0], binary[kb].bse_radc[0], binary[kb].bse_menv[0], binary[kb].bse_renv[0], binary[kb].bse_ospin[0], 
-            binary[kb].bse_epoch[0], binary[kb].bse_tms[0], binary[kb].bse_tphys, binary[kb].bse_bhspin[0]);
-          eprintf("peggy_check_afterbse: Star: t=%.18g ktype=%d m=%g mt=%g R=%g L=%g mc=%g rc=%g menv=%g renv=%g ospin=%g epoch=%g tms=%g tphys=%g bhspin=%g\n",
-              TotalTime, binary[kb].bse_kw[1], binary[kb].bse_mass0[1], binary[kb].bse_mass[1], binary[kb].bse_radius[1], binary[kb].bse_lum[1],
-              binary[kb].bse_massc[1], binary[kb].bse_radc[1], binary[kb].bse_menv[1], binary[kb].bse_renv[1], binary[kb].bse_ospin[1],
-              binary[kb].bse_epoch[1], binary[kb].bse_tms[1], binary[kb].bse_tphys, binary[kb].bse_bhspin[1]);
-            }
-          }
   
 
 	/*If this was a BBH merger, special things must be done*/
@@ -1130,18 +1084,18 @@ void handle_bse_outcome(long k, long kb, double *vs, double tphysf, int kprev0, 
   if (CO_TDE && (kprev0 == 14 || kprev1 == 14)){
     // check if star
     if (kprev0 < 10){ //0 is the star, 1 is the BH
-      eprintf("peggy_se: bh-star collision in se, before:t=%.18g bhmass=%g(id=%ld) starmass=%g(id=%ld) bhradius=%g\n",
-        TotalTime, binary[kb].m2* units.mstar / FB_CONST_MSUN, binary[kb].id2, binary[kb].m1* units.mstar / FB_CONST_MSUN, binary[kb].id1, binary[kb].rad2* units.l / RSUN);
+      // eprintf("peggy_se: bh-star collision in se, before:t=%.18g bhmass=%g(id=%ld) starmass=%g(id=%ld) bhradius=%g\n",
+      //   TotalTime, binary[kb].m2* units.mstar / FB_CONST_MSUN, binary[kb].id2, binary[kb].m1* units.mstar / FB_CONST_MSUN, binary[kb].id1, binary[kb].rad2* units.l / RSUN);
       bh_star_merger(-1, -1, &(binary[kb].m2), &(binary[kb].m1), &(star[knew]));
-      eprintf("peggy_se: bh-star collision in se, after:t=%.18g bhmass=%g(id=%ld) bhradius=%g bhtype=%d bhospin=%g bhspin=%g bhlum=%g\n", 
-        TotalTime, star[knew].m* units.mstar / FB_CONST_MSUN, star[knew].id, star[knew].rad* units.l / RSUN, star[knew].se_k, star[knew].se_ospin, star[knew].se_bhspin ,star[knew].se_lum);
+      // eprintf("peggy_se: bh-star collision in se, after:t=%.18g bhmass=%g(id=%ld) bhradius=%g bhtype=%d bhospin=%g bhspin=%g bhlum=%g\n", 
+      //   TotalTime, star[knew].m* units.mstar / FB_CONST_MSUN, star[knew].id, star[knew].rad* units.l / RSUN, star[knew].se_k, star[knew].se_ospin, star[knew].se_bhspin ,star[knew].se_lum);
     }
     else if (kprev1 < 10){//1 is the star, 0 is the BH
-      eprintf("peggy_se: bh-star collision in se, before:t=%.18g bhmass=%g(id=%ld) starmass=%g(id=%ld) bhradius=%g\n",
-        TotalTime, binary[kb].m1* units.mstar / FB_CONST_MSUN, binary[kb].id1, binary[kb].m2* units.mstar / FB_CONST_MSUN, binary[kb].id2, binary[kb].rad1* units.l / RSUN);
+      // eprintf("peggy_se: bh-star collision in se, before:t=%.18g bhmass=%g(id=%ld) starmass=%g(id=%ld) bhradius=%g\n",
+      //   TotalTime, binary[kb].m1* units.mstar / FB_CONST_MSUN, binary[kb].id1, binary[kb].m2* units.mstar / FB_CONST_MSUN, binary[kb].id2, binary[kb].rad1* units.l / RSUN);
       bh_star_merger(-1, -1, &(binary[kb].m1), &(binary[kb].m2), &(star[knew]));
-      eprintf("peggy_se: bh-star collision in se, after:t=%.18g bhmass=%g(id=%ld) bhradius=%g bhtype=%d bhospin=%g bhspin=%g bhlum=%g\n", 
-        TotalTime, star[knew].m* units.mstar / FB_CONST_MSUN, star[knew].id, star[knew].rad* units.l / RSUN, star[knew].se_k, star[knew].se_ospin, star[knew].se_bhspin ,star[knew].se_lum);
+      // eprintf("peggy_se: bh-star collision in se, after:t=%.18g bhmass=%g(id=%ld) bhradius=%g bhtype=%d bhospin=%g bhspin=%g bhlum=%g\n", 
+      //   TotalTime, star[knew].m* units.mstar / FB_CONST_MSUN, star[knew].id, star[knew].rad* units.l / RSUN, star[knew].se_k, star[knew].se_ospin, star[knew].se_bhspin ,star[knew].se_lum);
     }
   }
 
@@ -1235,29 +1189,6 @@ void handle_bse_outcome(long k, long kb, double *vs, double tphysf, int kprev0, 
     knew = create_star(k, 1);
     cp_binmemb_to_star(k, 1, knew);
 
-    if (CO_TDE && (kprev0 == 14 || kprev1 == 14)){
-      // check if star
-      if (kprev0 < 10){//0 is the star, 1 is the BH
-          eprintf("peggy_check_afterbse: BH: t=%.18g ktype=%d m=%g mt=%g R=%g L=%g mc=%g rc=%g menv=%g renv=%g ospin=%g epoch=%g tms=%g tphys=%g bhspin=%g\n",
-            TotalTime, binary[kb].bse_kw[1], binary[kb].bse_mass0[1], binary[kb].bse_mass[1], binary[kb].bse_radius[1], binary[kb].bse_lum[1], 
-            binary[kb].bse_massc[1], binary[kb].bse_radc[1], binary[kb].bse_menv[1], binary[kb].bse_renv[1], binary[kb].bse_ospin[1], 
-            binary[kb].bse_epoch[1], binary[kb].bse_tms[1], binary[kb].bse_tphys, binary[kb].bse_bhspin[1]);
-          eprintf("peggy_check_afterbse: Star: t=%.18g ktype=%d m=%g mt=%g R=%g L=%g mc=%g rc=%g menv=%g renv=%g ospin=%g epoch=%g tms=%g tphys=%g bhspin=%g\n",
-              TotalTime, binary[kb].bse_kw[0], binary[kb].bse_mass0[0], binary[kb].bse_mass[0], binary[kb].bse_radius[0], binary[kb].bse_lum[0],
-              binary[kb].bse_massc[0], binary[kb].bse_radc[0], binary[kb].bse_menv[0], binary[kb].bse_renv[0], binary[kb].bse_ospin[0],
-              binary[kb].bse_epoch[0], binary[kb].bse_tms[0], binary[kb].bse_tphys, binary[kb].bse_bhspin[0]);
-            }
-      else if (kprev1 < 10){//1 is the star, 0 is the BH
-          eprintf("peggy_check_afterbse: BH: t=%.18g ktype=%d m=%g mt=%g R=%g L=%g mc=%g rc=%g menv=%g renv=%g ospin=%g epoch=%g tms=%g tphys=%g bhspin=%g\n",
-            TotalTime, binary[kb].bse_kw[0], binary[kb].bse_mass0[0], binary[kb].bse_mass[0], binary[kb].bse_radius[0], binary[kb].bse_lum[0], 
-            binary[kb].bse_massc[0], binary[kb].bse_radc[0], binary[kb].bse_menv[0], binary[kb].bse_renv[0], binary[kb].bse_ospin[0], 
-            binary[kb].bse_epoch[0], binary[kb].bse_tms[0], binary[kb].bse_tphys, binary[kb].bse_bhspin[0]);
-          eprintf("peggy_check_afterbse: Star: t=%.18g ktype=%d m=%g mt=%g R=%g L=%g mc=%g rc=%g menv=%g renv=%g ospin=%g epoch=%g tms=%g tphys=%g bhspin=%g\n",
-              TotalTime, binary[kb].bse_kw[1], binary[kb].bse_mass0[1], binary[kb].bse_mass[1], binary[kb].bse_radius[1], binary[kb].bse_lum[1],
-              binary[kb].bse_massc[1], binary[kb].bse_radc[1], binary[kb].bse_menv[1], binary[kb].bse_renv[1], binary[kb].bse_ospin[1],
-              binary[kb].bse_epoch[1], binary[kb].bse_tms[1], binary[kb].bse_tphys, binary[kb].bse_bhspin[1]);
-            }
-          }
 
 
 	/*If this was a BBH merger, special things must be done*/
@@ -1268,18 +1199,18 @@ void handle_bse_outcome(long k, long kb, double *vs, double tphysf, int kprev0, 
   if (CO_TDE && (kprev0 == 14 || kprev1 == 14)){
     // check if star
     if (kprev0 < 10){ //0 is the star, 1 is the BH
-      eprintf("peggy_se: bh-star collision in se, before:t=%.18g bhmass=%g(id=%ld) starmass=%g(id=%ld) bhradius=%g\n",
-        TotalTime, binary[kb].m2* units.mstar / FB_CONST_MSUN, binary[kb].id2, binary[kb].m1* units.mstar / FB_CONST_MSUN, binary[kb].id1, binary[kb].rad2* units.l / RSUN);
+      // eprintf("peggy_se: bh-star collision in se, before:t=%.18g bhmass=%g(id=%ld) starmass=%g(id=%ld) bhradius=%g\n",
+      //   TotalTime, binary[kb].m2* units.mstar / FB_CONST_MSUN, binary[kb].id2, binary[kb].m1* units.mstar / FB_CONST_MSUN, binary[kb].id1, binary[kb].rad2* units.l / RSUN);
       bh_star_merger(-1, -1, &(binary[kb].m2), &(binary[kb].m1), &(star[knew]));
-      eprintf("peggy_se: bh-star collision in se, after:t=%.18g bhmass=%g(id=%ld) bhradius=%g bhtype=%d bhospin=%g bhspin=%g bhlum=%g\n", 
-        TotalTime, star[knew].m* units.mstar / FB_CONST_MSUN, star[knew].id, star[knew].rad* units.l / RSUN, star[knew].se_k, star[knew].se_ospin, star[knew].se_bhspin ,star[knew].se_lum);
+      // eprintf("peggy_se: bh-star collision in se, after:t=%.18g bhmass=%g(id=%ld) bhradius=%g bhtype=%d bhospin=%g bhspin=%g bhlum=%g\n", 
+      //   TotalTime, star[knew].m* units.mstar / FB_CONST_MSUN, star[knew].id, star[knew].rad* units.l / RSUN, star[knew].se_k, star[knew].se_ospin, star[knew].se_bhspin ,star[knew].se_lum);
     }
     else if (kprev1 < 10){//1 is the star, 0 is the BH
-      eprintf("peggy_se: bh-star collision in se, before:t=%.18g bhmass=%g(id=%ld) starmass=%g(id=%ld) bhradius=%g\n",
-        TotalTime, binary[kb].m1* units.mstar / FB_CONST_MSUN, binary[kb].id1, binary[kb].m2* units.mstar / FB_CONST_MSUN, binary[kb].id2, binary[kb].rad1* units.l / RSUN);
+      // eprintf("peggy_se: bh-star collision in se, before:t=%.18g bhmass=%g(id=%ld) starmass=%g(id=%ld) bhradius=%g\n",
+      //   TotalTime, binary[kb].m1* units.mstar / FB_CONST_MSUN, binary[kb].id1, binary[kb].m2* units.mstar / FB_CONST_MSUN, binary[kb].id2, binary[kb].rad1* units.l / RSUN);
       bh_star_merger(-1, -1, &(binary[kb].m1), &(binary[kb].m2), &(star[knew]));
-      eprintf("peggy_se: bh-star collision in se, after:t=%.18g bhmass=%g(id=%ld) bhradius=%g bhtype=%d bhospin=%g bhspin=%g bhlum=%g\n", 
-        TotalTime, star[knew].m* units.mstar / FB_CONST_MSUN, star[knew].id, star[knew].rad* units.l / RSUN, star[knew].se_k, star[knew].se_ospin, star[knew].se_bhspin ,star[knew].se_lum);
+      // eprintf("peggy_se: bh-star collision in se, after:t=%.18g bhmass=%g(id=%ld) bhradius=%g bhtype=%d bhospin=%g bhspin=%g bhlum=%g\n", 
+      //   TotalTime, star[knew].m* units.mstar / FB_CONST_MSUN, star[knew].id, star[knew].rad* units.l / RSUN, star[knew].se_k, star[knew].se_ospin, star[knew].se_bhspin ,star[knew].se_lum);
     }
   }
 
